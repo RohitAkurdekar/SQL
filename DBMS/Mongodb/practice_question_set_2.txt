@@ -1,0 +1,57 @@
+
+/*--------------------------------------------
+  Exercises on simple selects 
+-------------------------------------------- */
+
+// Name of the supplier that reside in chennai  [Case insensitive ]
+// Name of the supplier that reside in chennai/delhi/ahmedabad  [Case insensitive ]
+// Name of the supplier , contact , email , Address 
+// who resides in either Mumbai Or Delhi [CI] and email does not belong to gmail account
+// Name of the supplier , contact , email , Address 
+// who resides in either Mumbai Or Delhi [CI] and email does not belong to gmail account
+// book_name,book_publication
+// of all books placed on rack_num = a1 and publication is not equal to tata mcgraw hill
+// book_code , member_id of all book issuances which have been fined 
+
+
+
+
+
+
+-- solutions below:
+
+
+// Name of the supplier that reside in chennai  [Case insensitive ]
+db.LMS_SUPPLIERS_DETAILS.find({ADDRESS: /cHENNAI/i},{ADDRESS:1 , _id:0})
+
+// Name of the supplier that reside in chennai/delhi/ahmedabad  [Case insensitive ]
+
+db.LMS_SUPPLIERS_DETAILS.find({ ADDRESS: {$in: [/cHENNAI/i,/delhi/i,/ahmedabad/i]}} ,{ADDRESS:1 , _id:0})
+db.LMS_SUPPLIERS_DETAILS.find({$or : [ { ADDRESS : /cHENNAI/i } , {ADDRESS :/delhi/i } ,{ADDRESS : /ahmedabad/i}]},{ADDRESS:1 , _id:0});
+
+// Name of the supplier , contact , email , Address 
+// who resides in either Mumbai Or Delhi [CI] and email does not belong to gmail account
+
+db.LMS_SUPPLIERS_DETAILS.find({$and: [ {$or : [ { ADDRESS : /Mumbai/i } , {ADDRESS :/Delhi/i } ]} ,{ EMAIL: { $not:  /.*@gmail.com/  } }] },{SUPPLIER_NAME:1,CONTACT:1,EMAIL:1});
+db.LMS_SUPPLIERS_DETAILS.find({$or : [ { ADDRESS : /Mumbai/i } , {ADDRESS :/Delhi/i } ] ,EMAIL: { $not:  /.*@gmail.com/  }  },{SUPPLIER_NAME:1,CONTACT:1,EMAIL:1});
+// db.LMS_SUPPLIERS_DETAILS.find({$or : [ { ADDRESS : /Mumbai/i } , {ADDRESS :/Delhi/i } ]} , { EMAIL: { $not:  /.*@gmail.com/  } },{});
+
+
+// book_name,book_publication
+// of all books placed on rack_num = a1 and publication is not equal to tata mcgraw hill
+
+db.LMS_BOOK_DETAILS.find({RACK_NUM : "A1" , PUBLICATION : { $ne: "Tata Mcgraw Hill"}},{BOOK_TITLE:1,PUBLICATION:1});
+db.LMS_BOOK_DETAILS.find({$and: [{RACK_NUM : "A1"}, {PUBLICATION : { $ne: "Tata Mcgraw Hill"}}]},{BOOK_TITLE:1,PUBLICATION:1});
+db.LMS_BOOK_DETAILS.find({$and : [{RACK_NUM : "A1" },{PUBLICATION : { $not: { $regex : /Tata Mcgraw Hill/}}}]},{BOOK_TITLE:1,PUBLICATION:1});
+
+/*
+RACK_NUM : "A1" , 
+PUBLICATION : { $neq: "Tata Mcgraw Hill"}
+PUBLICATION : { $not: { $regex : /Tata Mcgraw Hill/}}
+!= '%goa%'
+like '%goa%'
+*/
+'
+
+// book_code , member_id of all book issuances which have been fined 
+db.LMS_BOOK_ISSUE.find({FINE_RANGE : {$ne: null }},{BOOK_CODE:1,MEMBER_ID:1});

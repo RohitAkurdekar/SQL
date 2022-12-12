@@ -1,0 +1,314 @@
+Today's agenda
+------------------------
+What is Integrity constraint and their types 
+demo on Integrity constraint
+hands on 
+assignment 
+-------------------------------------
+Integrity constraints :
+-------------------------------------
+a) primary key : not null + duplicate values not allowed -- we use primary keys 
+b) Not null constraints : cannot have null  values -- use not null keyword 
+c) Referential integrity : that the refered column should have a valid value -- foreign keys 
+d) check constraint : checks for specified custom condition provided by user 
+e) unique :  duplicate values not allowed  -- use unique keyword
+
+------------------------------
+demo on Integrity constraint
+------------------------------
+-- create the table 
+CREATE TABLE MY_FIRST_TABLE
+(
+NAME VARCHAR2(100),
+ROLLNO NUMBER ,
+DATE_OF_ENROLLMENT DATE
+);
+
+desc MY_FIRST_TABLE;
+
+select  * FrOM  MY_FIRST_TABLE;
+insert into MY_FIRST_TABLE(ROLLNO) values (1);
+-- duplicate insert
+insert into MY_FIRST_TABLE(ROLLNO) values (1);
+-- null insert
+insert into MY_FIRST_TABLE(ROLLNO) values (null);
+
+-- a) primary key rollno (Unique + not null )
+
+drop TABLE MY_FIRST_TABLE;
+
+CREATE TABLE MY_FIRST_TABLE
+(
+ROLLNO NUMBER ,
+NAME VARCHAR2(100),
+DATE_OF_ENROLLMENT DATE,
+constraint cons1 primary key(rollno)
+);
+
+desc MY_FIRST_TABLE;
+select  * FrOM  MY_FIRST_TABLE;
+insert into MY_FIRST_TABLE(ROLLNO) values (1);
+-- duplicate insert
+insert into MY_FIRST_TABLE(ROLLNO) values (1);
+-- null insert
+insert into MY_FIRST_TABLE(ROLLNO) values (null);
+
+select * from user_constraints ;
+-- DROPPING THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE drop constraint cons1;
+
+-- adding THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE add constraint cons1 primary key(rollno);
+
+
+-- a) Unique key NAME (Unique)
+drop TABLE MY_FIRST_TABLE;
+
+CREATE TABLE MY_FIRST_TABLE
+(
+ROLLNO NUMBER,
+NAME VARCHAR2(100),
+DATE_OF_ENROLLMENT DATE,
+constraint cons1 primary key(rollno),
+constraint cons2 unique(NAME)
+);
+
+select  * FrOM USER_constraints where table_name = 'MY_FIRST_TABLE' ;
+select  * FrOM  MY_FIRST_TABLE;
+insert into MY_FIRST_TABLE(ROLLNO,NAME) values (1,'gaurav');
+-- duplicate insert
+insert into MY_FIRST_TABLE(ROLLNO,NAME) values (2,'gaurav');
+-- null insert
+insert into MY_FIRST_TABLE(ROLLNO,NAME) values (3,null);
+insert into MY_FIRST_TABLE(ROLLNO,NAME) values (4,null);
+
+-- DROPPING THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE drop constraint cons2;
+
+-- adding THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE add constraint cons2 unique(NAME);
+
+--- what if the column has non-unique values and we need to apply a unique constraint over that column
+drop table test_unique;
+create table test_unique ( city varchar2(10));
+insert into test_unique(city) values ( 'Pune');
+insert into test_unique(city) values ( 'Pune');
+
+select * from test_unique;
+alter table test_unique add constraint cons33 unique(city);
+
+-- some way to make sure the data is unique 
+update test_unique
+set city = 'Delhi'
+where rowid = (select rowid from test_unique where rownum =1 )
+
+-- a) Not null  DATE_OF_ENROLLMENT (not null )
+drop TABLE MY_FIRST_TABLE;
+
+CREATE TABLE MY_FIRST_TABLE
+(
+ROLLNO NUMBER,
+NAME VARCHAR2(100) ,
+DATE_OF_ENROLLMENT date constraint cons3 not null ,
+constraint cons1 primary key(rollno),
+constraint cons2 unique(name)
+);
+
+alter session set nls_date_format = 'dd-mon-yyyy hh24:mi:ss'
+select  * FrOM USER_constraints where table_name = 'MY_FIRST_TABLE' ;
+select  * FrOM  MY_FIRST_TABLE;
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT) values (1,'gaurav',to_date('01-01-2001','dd-mm-yyyy'));
+-- duplicate insert
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT) values (2,'pratik',to_date('01-01-2001','dd-mm-yyyy'));
+-- null insert
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT) values (3,'sagar',null);
+
+-- trying to update a null value in a not null column 
+update MY_FIRST_TABLE set DATE_OF_ENROLLMENT = null ;
+
+-- DROPPING THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE MODIFY (DATE_OF_ENROLLMENT NULL);
+
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT) values (4,'Sarwesh',to_date('02-02-2002','dd-mm-yyyy'));
+
+-- adding THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE MODIFY (DATE_OF_ENROLLMENT constraint cons3 NOT NULL);
+
+-- drop THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE drop constraint cons3;
+
+-- a column without the not null constraints 
+-- nulls will be allowed
+-- alter the table to add a not null constraint 
+-- fails since we already have nulls
+
+drop table test_nulls;
+create table test_nulls ( feedback varchar2(100));
+
+insert into test_nulls(feedback) values ( 'This is my first feedback');
+insert into test_nulls(feedback) values ( '');
+
+select * from test_nulls where feedback is null ;
+
+ALTER TABLE test_nulls MODIFY (feedback NOT NULL);
+update test_nulls set feedback = 'Default feedback because it was null' where feedback is null 
+
+-- a) DATE_OF_BIRTH (check constraint  )
+drop TABLE MY_FIRST_TABLE;
+
+CREATE TABLE MY_FIRST_TABLE
+(
+ROLLNO NUMBER,
+NAME VARCHAR2(100) ,
+DATE_OF_ENROLLMENT date constraint cons3 not null ,
+DATE_OF_BIRTH DATE,
+constraint cons1 primary key(rollno),
+constraint cons2 unique(name),
+CONSTRAINT cons4 CHECK(DATE_OF_BIRTH > to_date('01-01-2001','dd-mm-yyyy') )
+);
+
+
+select  * FrOM USER_constraints where table_name = 'MY_FIRST_TABLE' ;
+select  * FrOM  MY_FIRST_TABLE;
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT,DATE_OF_BIRTH) values (1,'gaurav',to_date('10-01-2001','dd-mm-yyyy'),to_date('10-01-2001','dd-mm-yyyy'));
+-- insert that will fail
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT,DATE_OF_BIRTH) values (2,'gaurav',to_date('01-01-2000','dd-mm-yyyy'),to_date('01-01-2000','dd-mm-yyyy'));
+-- null insert
+insert into MY_FIRST_TABLE(ROLLNO,NAME,DATE_OF_ENROLLMENT,DATE_OF_BIRTH) values (3,'sagar',to_date('01-01-2000','dd-mm-yyyy'),null);
+-- updating the column to not satisfy the check constraint 
+update MY_FIRST_TABLE set DATE_OF_BIRTH = to_date('01-01-2000','dd-mm-yyyy') where DATE_OF_BIRTH is null 
+
+
+-- DROPPING THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE drop constraint cons4;
+
+-- adding THE CONSTRAINT
+ALTER TABLE MY_FIRST_TABLE add constraint CONS4 CHECK(DATE_OF_BIRTH > to_date('01-01-2001','dd-mm-yyyy') );
+
+
+--- Foreign key demo
+DROP TABLE  MY_FIRST_TABLE;
+DROP TABLE  MY_DEPARTMENT_TABLE;
+
+
+CREATE TABLE MY_DEPARTMENT_TABLE
+(
+DEPT_ID NUMBER ,
+DEPT_NAME VARCHAR2(100),
+constraint cons5 PRIMARY KEY(DEPT_ID)
+);
+
+
+CREATE TABLE MY_FIRST_TABLE
+(
+ROLLNO NUMBER ,
+NAME VARCHAR2(100) unique,
+DEPARTMENT_ID  NUMBER ,
+constraint cons6 primary key(rollno),
+CONSTRAINT CONS_FOR FOREIGN KEY (DEPARTMENT_ID) REFERENCES MY_DEPARTMENT_TABLE(DEPT_ID)
+);
+
+select * from MY_DEPARTMENT_TABLE;
+select * from MY_FIRST_TABLE;
+
+insert into MY_DEPARTMENT_TABLE (DEPT_ID,DEPT_NAME) values (100,'Computer Science');
+
+insert into MY_FIRST_TABLE (ROLLNO,NAME,DEPARTMENT_ID) values (1,'gaurav',100);
+-- invalid value 
+insert into MY_FIRST_TABLE (ROLLNO,NAME,DEPARTMENT_ID) values (2,'Sagar',200);
+-- insert null 
+insert into MY_FIRST_TABLE (ROLLNO,NAME,DEPARTMENT_ID) values (3,'Danny',null);
+
+---------------------------
+Exercise 01 -- Constraints
+---------------------------
+1) Create table named 
+lms_members(MEMBER_ID	varchar2, MEMBER_NAME varchar2,	CITY varchar2,	DATE_REGISTER date, DATE_EXPIRE	date, MEMBERSHIP_STATUS varchar2) 
+with constraints
+  i) primary key constraint on MEMBER_ID
+  ii) check constraint on DATE_REGISTER such that DATE_REGISTER > '01-01-2022'
+  iii) not null constraint on DATE_EXPIRE
+  iv) unique and not null constraint on MEMBER_NAME 
+
+2) drop all constraints 
+3) apply all constraints again using alter table command the one's defined in step1
+
+4) Insert following data -- use to_date('12-12-2012','dd-mm-yyyy') to store the hardcoded date
+   and observe why the cosntraint failed/ passed
+ 
+LM009	Nikita	Delhi	12-12-2022	12-12-2023	Temporary	
+LM009	Niki	Pune	02-12-2022	02-12-2023	Temporary	
+null	Rohit	Mumbai	09-12-2022	09-12-2023	Temporary	
+LM027	Priti	USA		01-06-2018	11-05-2023	Permanent	
+LM020	Supriya	Delhi	12-12-2022	null     	Temporary	
+LM024	Gaurav	Delhi	12-06-2022	12-05-2023	Temporary	
+LM025	Gaurav	pune	22-06-2022	22-05-2023	Permanent	
+LM026	null	nepal	02-06-2022	29-05-2023	Permanent	
+LM032	Sehwag	India	02-06-2022	29-05-2023	Permanent	
+
+
+----------------------------------------------------------------------
+Exercise 01 Solution -- Constraints 
+---------------------------------------------------------------------
+drop table lms_members;
+create table lms_members
+(
+Member_id varchar2(100),
+Member_name varchar2 (100) constraint cons4 not null,
+City varchar2 (100),
+Date_register date,
+Date_expire date constraint cons3 not null,
+Membership_status varchar2 (100),
+constraint cons1 primary key (Member_id),
+CONSTRAINT cons2 CHECK(Date_register > to_date('01-01-2022','dd-mm-yyyy')),
+constraint cons4_1 unique (Member_name)
+);
+select * from user_constraints where table_name = 'LMS_MEMBERS';
+ALTER TABLE lms_members drop constraint cons1;
+ALTER TABLE lms_members drop constraint cons2;
+ALTER TABLE lms_members drop constraint cons3;
+ALTER TABLE lms_members drop constraint cons4;
+ALTER TABLE lms_members drop constraint cons4_1;
+
+ALTER TABLE lms_members add constraint cons4_1 unique (Member_name);
+ALTER TABLE lms_members add constraint cons1 primary key(Member_id);
+ALTER TABLE lms_members add constraint cons2 CHECK(DATE_REGISTER > to_date('01-01-2022','dd-mm-yyyy'));
+ALTER TABLE lms_members MODIFY (Date_expire constraint cons3 NOT NULL);
+ALTER TABLE lms_members MODIFY (Member_name constraint cons4 NOT NULL);
+
+
+select * from lms_members ;
+
+delete from lms_members;
+
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM009','Nikita','Delhi',to_date('12-12-2022','dd-mm-yyyy'),to_date('12-12-2023','dd-mm-yyyy'),'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM009','Niki','Pune',to_date('02-12-2022','dd-mm-yyyy'),to_date('02-12-2023','dd--mm-yyyy'),'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES (null,'Rohit','Mumbai',to_date('09-12-2022','dd-mm-yyyy'),to_date('09-12-2023','dd--mm-yyyy'),'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM027','Priti','USA',to_date('01-06-2018','dd-mm-yyyy'),to_date('11-05-2023','dd-mm-yyyy'),'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM020','Supriya','Delhi',to_date('12-12-2022','dd-mm-yyyy'),null,'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM024','Gaurav','Delhi',to_date('12-06-2022','dd-mm-yyyy'),to_date('12-05-2023','dd-mm-yyyy'),'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM025','Gaurav','Pune',to_date('22-06-2022','dd-mm-yyyy'),to_date('22-05-2023','dd-mm-yyyy'),'Temporary');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM026',null,'nepal',to_date('02-06-2022','dd-mm-yyyy'),to_date('29-05-2023','dd-mm-yyyy'),'Permanent');
+INSERT INTO lms_members (Member_id,Member_name,City,Date_register,Date_expire,Membership_status) VALUES ('LM032','Sehwag','India',to_date('02-06-2022','dd-mm-yyyy'),to_date('29-05-2023','dd-mm-yyyy'),'Permanent');
+
+----------------------------------------
+Exercise 02 -- Constraints [Assignment]
+----------------------------------------
+1) Create table named 
+Create table named lms_suppliers_details(SUPPLIER_ID varchar2,SUPPLIER_NAME varchar2,ADDRESS	varchar2, CONTACT number,EMAIL varchar2)
+with constraints
+  i) primary key constraint on SUPPLIER_ID
+  ii) not null constraint on CONTACT
+  iii) unique and not null constraint on SUPPLIER_NAME 
+
+2) drop all constraints 
+3) apply all constraints again using alter table command the one's defined in step1
+4) Insert following data  and observe why the constraint failed/ passed
+ 
+S01		SINGAPORE SHOPPEE	CHENNAI		9894123555	sing@gmail.com // pass
+S01		Test	  			CHENNAI		9894123555	sing@gmail.com // fail
+NUll	Flat	  			CHENNAI		9894123555	sing@gmail.com // fail
+S02		JK Stores		    MUMBAI		null		jks@yahoo.com // fail
+S03		SINGAPORE SHOPPEE   TRIVANDRUM	9444411222	rose@gmail.com // fail
+S03		null			    TRIVANDRUM	9444411222	rose@gmail.com // fail
+

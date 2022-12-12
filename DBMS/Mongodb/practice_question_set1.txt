@@ -1,0 +1,33 @@
+------------------------------------------------------------------
+Practice Questions: (Both Queries in SQL and mongodb )
+------------------------------------------------------------------
+
+1: Write a query to display the member id, member name, city and membership status who are all having life time membership. Hint: Life time membership status is “Permanent”.
+
+2: Write a query to display the book code, publication, price and supplier name of the book which has been issued to a member.
+
+3: Write a query to display the member id, member name who have taken the book with book code 'BL000002'.
+
+4: Write a query to display the member id, member name, fine range and fine amount of the members whose fine amount is less than 100.
+
+5: Write a query to display the book code, book title, publisher, edition, price and year of publication and sort based on year of publication, publisher and edition.
+
+6: Write a query to display the book code, book title and rack number of the books which are placed in rack 'A1' and sort by book title in ascending order.
+
+7: Write a query to display the book code, title, publish date of the books which is been published in the month of December.
+
+8: Write a query to display the book code, book title, supplier name and price of the book along with maximum price of the book for that supplier.
+
+9: Write a query to display book code, book name, and publisher, how old the book is as of today . Sorted as older to newer.
+
+10: Write a query to display book issue number, member name, date or registration, date of expiry, book title, category author, price, date of issue, date of return, actual returned date, fine amount.
+
+11: Write a query to display the member id, member name, fine range and fine amount of the members whose fine amount is less than 100.
+
+12: Write a query to display the member id, member name and total fine amount of the members whose total fine amount is less than 100.
+
+13: Write a query to display the member id, member name, fine range and total fine amount of the members whose total fine amount for a given fine range is less than 100
+
+14: Display the date on which the maximum numbers of books were issued and the number of books issued with alias name “NOOFBOOKS”.
+
+15: Write a Query to display the member id and member name and issuance number  who has not paid a fine on their issuance in the year 2012.

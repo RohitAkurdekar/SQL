@@ -1,0 +1,212 @@
+------------------------------------------------------------------
+Exercise on implementing a database code (CRUD) flows for an application 
+------------------------------------------------------------------
+
+
+******************************************************************
+Exercise 01 : Employee Management System
+******************************************************************
+
+Create an Employee Management System such that application 
+receives data in Employee_stage table where it is upserted to Employee table
+and all the expired rows as of today are archived to Expired_Employee table
+
+-----------------
+Technical Hints :
+-----------------
+
+Create three tables 
+1) Employee_stage( ES_id number,ES_name varchar,ES_city varchar,ES_expiry date)
+
+2) Employee( E_id number,E_name varchar,E_city varchar,E_expiry date)
+
+3) Expired_Employee( EE_id number,EE_name varchar,EE_city varchar,EE_expiry date)
+
+-------
+Application flow to code
+-------
+
+1) Any new employee that is enrolled or any changed employee rows 
+are inserted into Employee_stage 
+2) Write a script 
+ 2.1) that upserts Employee_stage data to the Employee table
+	 [(i) inserts the new rows 
+	 (ii) updates the existing rows ]
+ 2.2) Deletes the  Employee_stage
+3) Write a script  that 
+ 3.1) Moves the expired rows as of today to the Expired_Employee
+ 3.2) Deletes the  expired rows as of today from Employee
+ 
+ 
+ ---
+ Solution
+ ---
+ 
+create table Employee_stage( ES_id number,ES_name varchar2(100),ES_city varchar2(100),ES_expiry date);
+create table Employee( E_id number,E_name varchar2(100),E_city varchar2(100),E_expiry date);
+create table Expired_Employee( EE_id number,EE_name varchar2(100),EE_city varchar2(100),EE_expiry date);
+
+
+/* 1) Any new employee that is enrolled or any changed employee rows are inserted into Employee_stage 
+*/
+insert into  Employee_stage( ES_id ,ES_name ,ES_city ,ES_expiry )
+values (1,'Gaurav','Pune',to_date('01-01-2000','dd-mm-yyyy'));
+ 
+insert into Employee_stage( ES_id ,ES_name ,ES_city ,ES_expiry )
+values (1,'Pratik','Delhi',to_date('01-01-2023','dd-mm-yyyy'));
+
+/* 
+2) Write a script 
+ 2.1) that upserts Employee_stage data to the Employee table
+	 [(i) inserts the new rows 
+	 (ii) updates the existing rows ]
+ 2.2) Deletes the  Employee_stage
+ 
+*/ 
+select * from Employee_stage ;
+select * from Employee ;
+
+Merge into Employee  using Employee_stage on ( ES_id = E_id)
+when matched then update set E_name = ES_name, 
+                             E_city = ES_city,
+                             E_expiry = ES_expiry
+when not matched then insert (E_id ,E_name ,E_city ,E_expiry ) values (ES_id ,ES_name ,ES_city ,ES_expiry);
+
+delete  from Employee_stage ;
+
+/* 
+3) Write a script  that 
+ 3.1) Moves the expired rows as of today to the Expired_Employee
+ 3.2) Deletes the  expired rows as of today from Employee
+ */
+
+select * from  Employee where E_expiry < trunc(sysdate);
+select * from  Expired_Employee;
+
+Merge into Expired_Employee  using Employee on ( EE_id = E_id )
+when not matched then insert (EE_id ,EE_name ,EE_city ,EE_expiry ) values (E_id ,E_name ,E_city ,E_expiry)
+where E_expiry < trunc(sysdate) 
+
+delete from  Employee where E_expiry < trunc(sysdate);
+/*
+alter session set nls_date_format = 'dd-mon-yyyy hh24:mi:ss'
+select sysdate,trunc(sysdate) from dual;
+*/
+
+
+******************************************************************
+Exercise 02 : Car Management System  ( Used Cars )
+******************************************************************
+Create an Car Management System such that application 
+
+a) that receives data in Unserviced cars (buy price) 
+b) they will send it to service to the garage
+c) post servicing they make to car available for sale (sell_price)
+  sell_price = buy_price+servicing_cost+ 50%buy_price
+d) if it is sold we need update the status as SOLD with the customer 
+   name and contact information and selling_price
+   
+
+-----------------
+Technical Hints :
+-----------------
+Create three tables 
+1) unserviced_cars( USC_chassis_no number,USC_model_no number ,USC_date_of_registration date,cost_price float)
+2) under_service_cars( USC_chassis_no number,USC_model_no number ,USC_date_of_registration date,cost_price float,service_charge number)
+3) serviced_cars( USC_chassis_no number,USC_model_no number ,USC_date_of_registration date,cost_price float,service_charge number, sell_price number, is_sold, customer_name,customer_contact )
+
+-------
+Application flow to code
+-------
+1) inserts into unserviced_cars
+2) 
+	2.1) move unserviced_cars data that is sent to garage (under_service_cars table)
+	2.2) delete from unserviced_cars which have been sent to under_service_cars
+3) 
+	3.1) move under_service_cars data that is sent for sale (serviced_cars table)
+	3.2) update the sell_price = buy_price+servicing_cost+ 50%buy_price
+	3.3) delete from under_service_cars which have been sent to serviced_cars
+	3.4) when it is sold then update the serviced_cars to have customer information and update sell_price at which it is sold 
+
+		
+******************************************************************
+Exercise 03 : Food Counter 
+******************************************************************
+Create an application script for a food counter where 
+
+a) customer orders food item/s from the menu at a set price by the vendor
+b) customer order while being prepared is in prepared status 
+c) after preparation of the order it is handed over to the customer and 
+bill_amount is taken from the customer
+d) After 30 days archival process moves orders older than 30 days to a new table and deletes those records from orders table 
+-----------------
+Technical Hints :
+-----------------
+Create tables like
+1) Customer ( c_id number , c_name varchar2 )
+2) Food_item_menu ( FI_id number ,Dish_Name varchar2) 
+3) Order_detail ( O_id number , FI_id number ,c_id number ,
+ order_date date, o_status varchar2 ,o_bill_amount number)
+4) Archived_Order_detail ( O_id number , FI_id number ,c_id number , o_status varchar2 ,o_bill_amount number)
+
+-------
+Application flow to code
+-------
+1)  Intial Setup
+	1.1) Insert some customers 
+	1.2) Insert some food items 
+
+2) 	Customer Orders a food_item from the menu
+   2.1) Insert into Order_detail table with the details required
+   2.2) when the food is being prepared then the o_status is being_prepared 
+   2.3) when the food is handed over o_status is completed 
+		
+3) 
+	3.1) Archival process moves orders from Order_detail older than 30 days to a  Archived_Order_detail table
+	3.2) Deletes rows from Order_detail that were moved 
+
+
+
+******************************************************************
+Exercise 04 : Ticket booking system for a Bus
+******************************************************************
+Create an application script for a application that helps  
+
+a) customer book a bus ticket
+b) customer can cancel his ticket a day prior to journey date without any penalty
+c) customer can cancel his ticket 2 hours prior to journey datetime with  90% penalty of the cost price of the ticket
+d) customer can cancel his ticket after the 2 hours window before the 
+commencement of journey with 100% penalty of the cost price
+e) After 30 days archival process moves tickets booked older than 30 days to a new table and deletes those records from tickets booked table 
+
+-----------------
+Technical Hints :
+-----------------
+Create tables like
+1) Customer ( c_id number , c_name varchar2 )
+2) Bus ( bus_id number ,bus_Name varchar2, bus_source varchar2,bus_destination varchar2) 
+3) Bus_seats( seat_id number ,bus_id number,seat_type varchar2,cost_price number) 
+4) ticket_booking ( booking_id number ,booking_date date ,bus_id number ,seat_id number , journey_date date ,bill_amount number, is_active_booking varchar2,penalty_amount number,cancellation_date date)
+5) archived_ticket_booking ( booking_id number , bus_id number ,seat_id number , journey_date date ,bill_amount number)
+
+-------
+Application flow to code
+-------
+1)  Intial Setup
+	1.1) Insert some customers 
+	1.2) Insert some buses
+	1.3) Insert some bus seats
+
+2) 	Customer books a particular seat from the bus
+   2.1) Insert into ticket_booking table with the details required
+   2.2) if the customer cancel his ticket a day prior to journey date
+         no penalty_amount and is_active_booking is set to 'Cancelled' with the cancellation_date set to the datetime of cancellation  
+   2.3) if the customer cancel his ticket 2 hours prior to journey date
+         90% penalty_amount and is_active_booking is set to 'Cancelled' with the cancellation_date set to the datetime of cancellation  
+   2.4) if the customer cancel his ticket after 2 hours prior to journey date
+         100% penalty_amount and is_active_booking is set to 'Cancelled' with the cancellation_date set to the datetime of cancellation 
+		
+3) 
+	3.1) Archival process moves orders from ticket_booking older than 30 days to a  archived_ticket_booking table
+	3.2) Deletes rows from ticket_booking that were moved 
+

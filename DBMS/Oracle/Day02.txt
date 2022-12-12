@@ -1,0 +1,505 @@
+------
+b) DML (Data Manipulation Language)[changes made would be Temporary]
+INSERT,UPDATE,DELETE
+-----
+ 
+ 
+-- display purposes 
+alter session set nls_date_format = 'dd-mm-yyyy hh24:mi:ss';
+alter session set nls_timestamp_format = 'dd-mm-yyyy hh24:mi:ss.ff';
+
+/* three ways you can get date for a column*/
+select sysdate from dual;
+select current_date from dual;
+select to_date('01-01-2022 13:00:00','dd-mm-yyyy hh24:mi:ss') from dual;
+
+/* three ways you can get timestamp value for a column*/
+select systimestamp from dual;
+select current_timestamp from dual;
+select to_timestamp('01-JAN-2022 13:00:00:9999','dd-mon-yyyy hh24:mi:ss:FF') from dual;
+
+select * from MY_FIRST_TABLE ;
+-- INSERT INTO MY_FIRST_TABLE(COLUMN_LIST) VALUES (VALUE_LIST);
+
+insert into my_first_table
+(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column,my_varchar2_column)
+values 
+(1,2.9,to_date('01-01-2022 13:00:00','dd-mm-yyyy hh24:mi:ss'),to_timestamp('01-JAN-2022 13:00:00:9999','dd-mon-yyyy hh24:mi:ss:FF'),systimestamp,'my_first_row');
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (2,2.2,current_date,current_timestamp,current_timestamp);
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (2,2.2,current_date,current_timestamp,current_timestamp);
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column)
+VALUES (3,3.3,current_date,current_timestamp);
+
+-- invalid case for number(5,2) --- 3 digits before point and 2 digits after point 
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (12,9999.99,current_date,current_timestamp,current_timestamp);
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (12,999.999,current_date,current_timestamp,current_timestamp);
+
+/* try on local*/
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (33,23.299,to_date('27-Sep-2022 14:53:00','dd-mm-yyyy hh24:mi:ss'),to_timestamp('27-Sep-2022 14:53:00.100900','dd-mm-yyyy hh24:mi:ss.ff'),current_timestamp);
+
+
+------------------
+delete and update
+-------------------
+
+create table MY_FIRST_TABLE
+(
+my_number_column number, 
+my_float_column number(5,2),
+my_date_column date,
+my_timestamp_column timestamp,
+my_timestampTZ_column timestamp with time zone,
+my_varchar2_column varchar2(100)
+);
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (1,1.2,sysdate,systimestamp,systimestamp);
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (1,1.2,sysdate,systimestamp,systimestamp);
+
+delete  from MY_FIRST_TABLE where my_number_column = 1;
+
+
+update  MY_FIRST_TABLE  
+set my_float_column = 5.9 , MY_VARCHAR2_COLUMN = 'my_updated_value'
+where MY_TIMESTAMP_COLUMN =  to_timestamp('30-11-2022 03:40:08.058444','dd-mm-yyyy hh24:mi:ss:ff');
+
+update  MY_FIRST_TABLE  
+set my_float_column = 6.3 , MY_VARCHAR2_COLUMN = 'my_updated_value111' 
+where  MY_TIMESTAMP_COLUMN = to_timestamp('30-11-2022 03:40:08.061735','dd-mm-yyyy hh24:mi:ss:ff');
+
+select * from MY_FIRST_TABLE   ;
+
+
+
+-----------------------------------
+--- difference between truncate and delete 
+-----------------------------------
+drop table MY_FIRST_TABLE;
+create table MY_FIRST_TABLE
+(
+my_number_column number, 
+my_float_column number(5,2),
+my_date_column date,
+my_timestamp_column timestamp,
+my_timestampTZ_column timestamp with time zone,
+my_varchar2_column varchar2(100)
+);
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (1,1.2,sysdate,systimestamp,systimestamp);
+
+INSERT INTO MY_FIRST_TABLE(my_number_column,my_float_column,my_date_column,my_timestamp_column,my_timestampTZ_column)
+VALUES (2,2.2,sysdate,systimestamp,systimestamp);
+
+select * from MY_FIRST_TABLE;
+
+select * from MY_FIRST_TABLE   ;
+delete from MY_FIRST_TABLE ;
+rollback;
+select * from MY_FIRST_TABLE   ;
+
+select * from MY_FIRST_TABLE   ;
+truncate table MY_FIRST_TABLE ;
+rollback;
+select * from MY_FIRST_TABLE   ;
+
+--------------------------
+rollback and savepoint and commit
+------------------------
+drop table dummy;
+create table dummy
+(
+ dummy_col number
+);
+insert into dummy(dummy_col) values ( 1);
+insert into dummy(dummy_col) values ( 2);
+insert into dummy(dummy_col) values ( 3);
+insert into dummy(dummy_col) values ( 4);
+
+select * from dummy;
+
+
+-- case 1  commit
+exec savepoint s1 ;
+ delete from dummy where dummy_col = 1 ;
+exec savepoint s2 ;
+ delete from dummy where dummy_col = 2 ;
+commit; 
+select * from dummy;
+
+
+-- case 2  rollback
+exec savepoint s1 ;
+ delete from dummy where dummy_col = 1 ;
+exec savepoint s2 ;
+ delete from dummy where dummy_col = 2 ;
+rollback; 
+select * from dummy;
+
+-- case 2  rollback to savepoint
+exec savepoint s1 ;
+ delete from dummy where dummy_col = 1 ;
+exec savepoint s2 ;
+ delete from dummy where dummy_col = 2 ;
+rollback to s2; 
+select * from dummy;
+
+exec savepoint s1 ;
+ delete from dummy where dummy_col = 1 ;
+exec savepoint s2 ;
+ delete from dummy where dummy_col = 2 ;
+rollback to s1; 
+select * from dummy;
+
+---------------
+--- Merge demo
+---------------
+-----
+Example 1
+-----
+--- simple merge without delete 
+drop table dest_table;
+drop table source_table;
+create table dest_table
+(
+    d_id number,
+    d_name varchar2(100)
+);
+
+create table source_table
+(
+    s_id number,
+    s_name varchar2(100)
+);
+
+insert into dest_table(d_id,d_name) values (1,'Pune');
+insert into dest_table(d_id,d_name) values (2,'Mumbai');
+insert into dest_table(d_id,d_name) values (4,'US');
+
+insert into source_table(s_id,s_name) values (1,'US');
+insert into source_table(s_id,s_name) values (3,'UK');
+insert into source_table(s_id,s_name) values (4,'Argentina');
+
+
+select * from dest_table ;
+select * from source_table ;
+
+merge into dest_table using source_table on (d_id = s_id)
+when matched then update set d_name= s_name 
+when not matched then insert(d_id,d_name) values (s_id,s_name);
+
+
+-- case delete destination after/before the merge 
+drop table dest_table;
+drop table source_table;
+create table dest_table
+(
+    d_id number,
+    d_name varchar2(100)
+);
+
+create table source_table
+(
+    s_id number,
+    s_name varchar2(100)
+);
+
+insert into dest_table(d_id,d_name) values (1,'Pune');
+insert into dest_table(d_id,d_name) values (2,'Mumbai');
+insert into dest_table(d_id,d_name) values (4,'Pune');
+
+insert into source_table(s_id,s_name) values (1,'Pune');
+insert into source_table(s_id,s_name) values (2,'Pune');
+insert into source_table(s_id,s_name) values (4,'US');
+
+
+
+select * from dest_table ;
+select * from source_table ;
+
+merge into dest_table using source_table on (d_id = s_id)
+when matched then update set d_name= s_name delete where d_name = 'Pune'
+when not matched then insert(d_id,d_name) values (s_id,s_name); 
+
+
+merge into dest_table using source_table on (d_id = s_id)
+when matched then update set d_name= s_name delete where s_name = 'Pune'
+when not matched then insert(d_id,d_name) values (s_id,s_name); 
+
+------------------
+--- Example 2
+------------------
+
+-- Demo example with delete clause in action
+
+DROP TABLE source;
+DROP  TABLE destination;
+
+-- create a table source
+CREATE TABLE source AS
+SELECT level AS id,
+       CASE
+         WHEN MOD(level, 2) = 0 THEN 10
+         ELSE 20
+       END AS status,
+       'Description of level ' || level AS description
+FROM   dual
+CONNECT BY level <= 5;
+
+
+-- create a table destination
+CREATE TABLE destination AS
+SELECT level AS id,
+
+       20 status,
+       'Description of level ' || level AS description
+FROM   dual
+CONNECT BY level <= 5;
+
+SELECT * FROM source;
+SELECT * FROM destination;
+
+MERGE INTO destination d
+  USING source s
+    ON (s.id = d.id)
+  WHEN MATCHED THEN
+    UPDATE SET  d.description = 'Updated',
+                d.status = 10
+    DELETE WHERE d.status = 10;
+    
+    
+    
+-- merging destination table from source table with delete clause of source table column (before merge delete)
+MERGE INTO destination d
+  USING source s
+    ON (s.id = d.id)
+  WHEN MATCHED THEN
+    UPDATE SET  d.description = 'Updated',
+                d.status = 10
+    DELETE WHERE s.status = 10;
+
+
+-=------------------------------------------------------------------Study Note :
+---------------
+delete clause always deletes the destination table[table where you want to merge]
+and rows that are matched      
+  timings 
+   case 1) if we do destination.column in delete clause : deletes after the merge happens 
+   case 2) if we do source.column in delete clause : 
+   deletes the  matched rows from the destination table
+   before the merge happens 
+   (matched rows are those that satisfy delete where clause from the source table column)
+  
+--------------------------------------------------------------------
+
+------------------------------------------------------------
+Exercise Question 1 :
+--------------------------------------------------------
+a) Create table named lms_members(MEMBER_ID	MEMBER_NAME	CITY	DATE_REGISTER	DATE_EXPIRE	MEMBERSHIP_STATUS)
+b) Drop table 
+c) create the table back again
+d) Alter the table 
+  i) add two more columns ADDRESS CONTACT
+  ii) Modify the datatype of existing Address column to be varchar2(3999)
+  iii) rename the address column name to member_address
+  iv) drop the contact column
+   v) rename the table to lms_members_practice
+
+e) Insert following data -- use to_date('12-12-2012','dd-mm-yyyy') to store the hardcoded date
+ 
+LM009	Nikita	Delhi	12-12-2012	12-12-2021	Temporary	rajori road 
+LM020	Supriya	Delhi	12-12-2012	12-12-2021	Temporary	uttam nagar
+LM024	Gaurav	Delhi	12-06-2018	12-05-2020	Temporary	nawada
+f) delete all the rows
+g) insert the data back again in point (e) 
+h) update for all rows Address column to Karnataka
+
+Reference : https://www.oracletutorial.com/oracle-basics/oracle-date-format/
+
+f)  TCL  -- please set your expectations by filling in ? in [? rows] before executing your code 
+   <case 1>  -- rollback
+	fire select to see current data in the table [? rows]
+	insert : LM011	Gaurav	Delhi	12-12-2012	12-12-2021	Temporary	rajori road
+	fire select to see current data in the table [? rows]
+	rollback;
+	fire select to see current data in the table [? rows]
+
+   <case 2> -- commit
+	fire select to see current data in the table [? rows]
+	insert : LM012	Gauri	Delhi	12-12-2012	12-12-2021	Temporary	uttam nagar
+	fire select to see current data in the table [? rows]
+	commit;
+	fire select to see current data in the table [? rows]
+
+   <case 3> -- rollback to savepoint 
+	fire select to see current data in the table [? rows]
+	create a savepoint named s1
+	insert : LM013	Pratik	Delhi	12-12-2012	12-12-2021	Temporary	uttam nagar
+	create a savepoint named s2
+	insert : LM014	Deepak	Delhi	12-12-2012	12-12-2021	Temporary	uttam nagar
+	fire select to see current data in the table [? rows]
+	rollback to savepoint s2;
+	fire select to see current data in the table [? rows]
+ 
+
+
+-------------------------------------------------------
+Exercise Question 2 :
+--------------------------------------------------------
+a) Create table named lms_suppliers_details(SUPPLIER_ID varchar2,SUPPLIER_NAME varchar2,ADDRESS	varchar2, CONTACT number,EMAIL varchar2)
+b) Drop table 
+c) create the table back again
+d) Alter the table 
+  i) add two more columns BLOOD_GROUP VARCHAR2	COUNTRY VARCHAR2
+  ii) rename the COUNTRY column name to member_COUNTRY
+  iii) Modify the BLOOD_GROUP to varchar2(3008)    
+  iv) drop the BLOOD_GROUP column
+
+  v) rename the table to lms_suppliers_details_p
+
+ 
+e) Insert following data 
+S01	SINGAPORE SHOPPEE	CHENNAI	9894123555	sing@gmail.com  India
+S02	JK Stores	MUMBAI	9940123450	jks@yahoo.com India
+S03	ROSE BOOK STORE	TRIVANDRUM	9444411222	rose@gmail.com India
+S04	KAVARI STORE	DELHI	8630001452	kavi@redif.com India
+
+
+f) delete all the rows
+g) insert the data back again in point (e) 
+h) update for all rows country column to 'USA'
+
+Reference : https://www.oracletutorial.com/oracle-basics/oracle-date-format/
+
+f)  TCL  -- please set your expectations by filling in ? in [? rows] before executing your code 
+   <case 1>  -- rollback
+	fire select to see current data in the table [? rows]
+	insert : S12	ZOMATO	MUMBAI	7855623440	money@gmail.com India
+	fire select to see current data in the table [? rows]
+	rollback;
+	fire select to see current data in the table [? rows]
+
+   <case 2> -- commit
+	fire select to see current data in the table [? rows]
+	insert : S10	JIO MART	DELHI	8644001452	free@rediff.com India
+	fire select to see current data in the table [? rows]
+	commit;
+	fire select to see current data in the table [? rows]
+
+   <case 3> -- rollback to savepoint 
+	fire select to see current data in the table [? rows]
+	create a savepoint named s1
+	insert : S08	D MART	MUMBAI	9940123450	dance@gmail.com India
+	create a savepoint named s2
+	insert : S06	AKBAR STORE	MUMBAI	7855623100	akbakst@aol.com India
+	fire select to see current data in the table [? rows]
+	rollback to savepoint s2;
+	fire select to see current data in the table [? rows]
+ 
+
+-------------------------------------------------------
+Exercise Question 3 :
+--------------------------------------------------------
+a) Create table named lms_book_details(BOOK_CODE varchar2,BOOK_TITLE varchar2,CATEGORY varchar2,AUTHOR varchar2,PUBLICATION varchar2,	PUBLISH_DATE date, BOOK_EDITION	number, PRICE number,RACK_NUM varchar2,	DATE_ARRIVAL date,	SUPPLIER_ID varchar2)
+b) Drop table 
+c) create the table back again
+Create table named lms_book_details(BOOK_CODE varchar2,BOOK_TITLE varchar2,CATEGORY varchar2,AUTHOR varchar2,PUBLICATION varchar2,	PUBLISH_DATE date, BOOK_EDITION	number, PRICE number,RACK_NUM varchar2,	DATE_ARRIVAL date,	SUPPLIER_ID varchar2)
+d) Alter the table 
+  i) add two more columns ISBN VARCHAR2	CURRENCY VARCHAR2
+  ii) rename the CURRENCY column name to BOOK_CURRENCY
+  iii) drop the ISBN column
+  iv) rename the table to lms_book_details_p
+  
+e) Insert following data 
+BL000001	Java How To Do Program			JAVA	Paul J. Deitel	Prentice Hall		10-12-1999	6	600	A1	10-05-2011	S01
+BL000002	Java: The Complete Reference	JAVA	Herbert Schildt	Tata Mcgraw Hill	10-10-2011	5	750	A1	10-05-2011	S03
+
+
+f) delete all the rows
+g) insert the data back again in point (e) 
+h) update for all rows CATEGORY column to 'JUNK'
+f)  TCL  -- please set your expectations by filling in ? in [? rows] before executing your code 
+   <case 1>  -- rollback
+	fire select to see current data in the table [? rows]
+	insert : BL000003	Java How To Do Program	JAVA	Paul J. Deitel	Prentice Hall	10-05-1999	6	600	A1	10-05-2012	S01
+	fire select to see current data in the table [? rows]
+	rollback;
+	fire select to see current data in the table [? rows]
+
+   <case 2> -- commit
+	fire select to see current data in the table [? rows]
+	insert : BL000003	Java How To Do Program	JAVA	Paul J. Deitel	Prentice Hall	10-05-1999	6	600	A1	10-05-2012	S01
+	fire select to see current data in the table [? rows]
+	commit;
+	fire select to see current data in the table [? rows]
+
+   <case 3> -- rollback to savepoint 
+	fire select to see current data in the table [? rows]
+	create a savepoint named s1
+	insert : BL000004	Java: The Complete Reference	JAVA	Herbert Schildt	Tata Mcgraw Hill	10-10-2011	5	750	A1	11-05-2012	S01
+	create a savepoint named s2
+	insert : BL000005	Java How To Do Program	JAVA	Paul J. Deitel	Prentice Hall	10-12-1999	6	600	A1	11-05-2012	S01
+	fire select to see current data in the table [? rows]
+	rollback to savepoint s2;
+	fire select to see current data in the table [? rows]
+ 
+ 
+ -------------------------------------------------------
+Exercise Question 4 :
+--------------------------------------------------------
+a) Create table named lms_book_issue(BOOK_ISSUE_NO number,MEMBER_ID varchar2,BOOK_CODE varchar2,	DATE_ISSUE date,DATE_RETURN date,DATE_RETURNED date,FINE_RANGE varchar2)
+
+b) Drop table 
+
+c) create the table back again
+ Create table named lms_book_issue(BOOK_ISSUE_NO number,MEMBER_ID varchar2,BOOK_CODE varchar2,	DATE_ISSUE date,DATE_RETURN date,DATE_RETURNED date,FINE_RANGE varchar2)
+
+d) Alter the table 
+  i) add two more columns Vendor_code VARCHAR2	place VARCHAR2
+  ii) rename the place column name to vendor_place
+  iii) drop the Vendor_code column
+  iv) rename the table to lms_suppliers_details_p
+e) Insert following data 
+6	LM003	BL000007	22-04-2012	07-05-2012	25-05-2012	R4
+12	LM003	BL000001	22-04-2013	07-05-2013	25-05-2013	R4
+
+
+f) delete all the rows
+g) insert the data back again in point (e) 
+h) update for all rows book_code column to 'B0000001111'
+f)  TCL  -- please set your expectations by filling in ? in [? rows] before executing your code 
+   <case 1>  -- rollback
+	fire select to see current data in the table [? rows]
+	insert : 18	LM003	BL000007	07-05-2012	22-05-2012	11-06-2012	R4
+	fire select to see current data in the table [? rows]
+	rollback;
+	fire select to see current data in the table [? rows]
+
+   <case 2> -- commit
+	fire select to see current data in the table [? rows]
+	insert : 18	LM003	BL000007	07-05-2012	22-05-2012	11-06-2012	R4
+	fire select to see current data in the table [? rows]
+	commit;
+	fire select to see current data in the table [? rows]
+
+   <case 3> -- rollback to savepoint 
+	fire select to see current data in the table [? rows]
+	create a savepoint named s1
+	insert : 24	LM003	BL000001	07-05-2013	22-05-2013	11-06-2013	R4
+	create a savepoint named s2
+	insert : 18	LM003	BL000007	07-05-2012	22-05-2012	11-06-2012	R4
+	fire select to see current data in the table [? rows]
+	rollback to savepoint s2;
+	fire select to see current data in the table [? rows]
+ 

@@ -1,0 +1,630 @@
+--------------------------------------------------------
+SQL Selects Introduction
+-------------------------------------------------------
+-----------------------------------------------
+An Excel Demo:
+-----------------------------------------------
+Question : Supplier names of all suppliers whose address is 'MUMBAI'
+1) identify the source of data : lms_suppliers_details
+2) filter on column : address
+3) project column : supplier_name
+
+o/p:
+
+SUPPLIER_NAME
+-------------
+JK Stores
+AKBAR STORE
+D MART
+ZOMATO
+
+Question : Names of the books who belong to category JAVA
+1) identify the source of data : lms_book_details 
+2) filter on column : CATEGORY
+3) project column : BOOK_TITLE
+
+BOOK_TITLE
+-------------------------
+Java How To Do Program
+Java: The Complete Reference
+Java How To Do Program
+Java: The Complete Reference
+Java How To Do Program
+Java: The Complete Reference
+Head First Design Patterns: A Brain-Friendly Guide
+
+Question : Names of the members who stay in city Pune
+1) identify the source of data : lms_members 
+2) filter on column : CITY
+3) project column : MEMBER_NAME
+
+MEMBER_NAME
+------------
+Amruta
+Mayur
+Renuka
+Smita
+
+Question :Names of the members and date of registration who stay in city (Pune/Mumbai/Bangalore)
+1) identify the source of data : lms_members 
+2) filter on column : CITY [Pune or Mumbai or Bangalore]
+3) project column : MEMBER_NAME,DATE_REGISTER
+
+MEMBER_NAME			DATE_REGISTER               -- and/or operator
+----------------------------------              true 	OR		true      = true
+Amruta				02-03-2020                  false	OR		true      = true
+Gautam				12-06-2018                  true	OR		false	  = true
+Mayur				19-09-2019                  false	OR		false     = false
+Nikhil				09-03-2020                  
+Renuka				02-03-2020                  true 	AND		true      = true
+Sayali				12-06-2018                  false	AND		true      = false
+Smita				19-09-2019                  true	AND		false	  = false
+Snehal				09-03-2020                  false	AND		false     = false
+Ritesh				12-06-2018
+
+
+Question :Names of the books who belong to category JAVA and author is "Paul J. Deitel"
+1) identify the source of data : lms_book_details 
+2) filter on column : CATEGORY AND AUTHOR
+3) project column : BOOK_TITLE
+
+BOOK_TITLE
+--------------------------
+Java How To Do Program
+Java How To Do Program
+Java How To Do Program
+
+
+Question : Member_id and book_code of all issuances that have not paid any fine 
+1) identify the source of data : lms_book_issue 
+2) filter on column : FINE_RANGE
+3) project column : MEMBER_ID	BOOK_CODE
+
+MEMBER_ID	BOOK_CODE
+------------------------
+LM001		BL000001
+LM005		BL000005
+LM001		BL000002
+LM005		BL000002
+LM001		BL000001
+LM005		BL000005
+LM001		BL000002
+LM005		BL000002
+
+Question : Member_id and book_code of all issuances where DATE_RETURN < DATE_RETURNED [Fine pay]
+
+1) identify the source of data : lms_book_issue 
+2) filter on column : FINE_RANGE  -- =IF(E3<F3,"OUT")
+3) project column : MEMBER_ID	BOOK_CODE
+	
+	
+MEMBER_ID	BOOK_CODE
+--------------------------
+LM002		BL000002
+LM003		BL000007
+LM004		BL000005
+LM003		BL000007
+LM002		BL000001
+LM003		BL000005
+LM004		BL000007
+LM003		BL000001
+LM002		BL000002
+LM003		BL000007
+LM004		BL000005
+LM003		BL000007
+LM002		BL000001
+LM003		BL000005
+LM004		BL000007
+LM003		BL000001
+	
+	
+Question : Name of the book and "It is placed on rack num <Racknum_value>" display where the category is python 
+1) identify the source of data : lms_book_details 
+2) filter on column : Category
+3) project column : BOOK_TITLE, <Derived column named display >
+
+
+BOOK_TITLE                                                   display
+--------------------------------------------------------------------------------------------
+Python Cookbook: Recipes for Mastering Python 3              It is placed on rack num -
+Learn Python in 1 Day                                        It is placed on rack num A3
+Python Programming:An Introduction to Computer Science       It is placed on rack num -
+	
+--------------------------------------
+Above Excel Demo using SQL [DEMO]
+--------------------------------------
+
+------- Select ------
+
+1) from <table_name1>[,<table_name2>] -- identify the source of data 
+2) where <expression> -- filter on the identified dataset
+3) group by <expression> -- group based on expression
+4) having <expression> -- filter results received after the group by 
+5) order by <expression> 
+
+
+Pipeline : (FROM)o/p 1 ------>(Where)	--->o/p 2---> (Group by)--> o/p3 --> (having)--> o/p4 --> (order by ) -->o/p5-->(select)-->o/p6
+
+Question : Supplier names of all suppliers whose address is 'MUMBAI'
+1) identify the source of data : lms_suppliers_details
+2) filter on column : address
+3) project column : supplier_name
+
+select supplier_name
+from lms_suppliers_details
+where address = 'MUMBAI';
+
+o/p:
+
+SUPPLIER_NAME
+-------------
+JK Stores
+AKBAR STORE
+D MART
+ZOMATO
+
+Question : Names of the books who belong to category JAVA
+1) identify the source of data : lms_book_details 
+2) filter on column : CATEGORY
+3) project column : BOOK_TITLE
+
+select BOOK_TITLE
+from lms_book_details
+where CATEGORY = 'JAVA';
+
+BOOK_TITLE
+-------------------------
+Java How To Do Program
+Java: The Complete Reference
+Java How To Do Program
+Java: The Complete Reference
+Java How To Do Program
+Java: The Complete Reference
+Head First Design Patterns: A Brain-Friendly Guide
+
+Question : Names of the members who stay in city Pune
+1) identify the source of data : lms_members 
+2) filter on column : CITY
+3) project column : MEMBER_NAME
+
+select MEMBER_NAME
+from lms_members
+where lower(CITY) = 'pune';
+
+MEMBER_NAME
+------------
+Amruta
+Mayur 
+Renuka
+Smita
+
+Question :Names of the members and date of registration who stay in city (Pune/Mumbai/Bangalore)
+1) identify the source of data : lms_members 
+2) filter on column : CITY [Pune or Mumbai or Bangalore]
+3) project column : MEMBER_NAME,DATE_REGISTER
+
+select MEMBER_NAME,DATE_REGISTER
+from lms_members
+where lower(CITY) in ('pune','mumbai','bangalore');
+-- where lower(CITY) = 'pune' or lower(city) = 'mumbai' or lower(city) = 'bangalore';
+
+MEMBER_NAME			DATE_REGISTER               -- and/or operator
+----------------------------------              true 	OR		true      = true
+Amruta				02-03-2020                  false	OR		true      = true
+Gautam				12-06-2018                  true	OR		false	  = true
+Mayur				19-09-2019                  false	OR		false     = false
+Nikhil				09-03-2020                  
+Renuka				02-03-2020                  true 	AND		true      = true
+Sayali				12-06-2018                  false	AND		true      = false
+Smita				19-09-2019                  true	AND		false	  = false
+Snehal				09-03-2020                  false	AND		false     = false
+Ritesh				12-06-2018
+
+
+Question :Names of the books who belong to category JAVA and author is "Paul J. Deitel"
+1) identify the source of data : lms_book_details 
+2) filter on column : CATEGORY AND AUTHOR
+3) project column : BOOK_TITLE
+
+
+select book_code , BOOK_TITLE
+from lms_book_details
+--where CATEGORY = 'JAVA' AND AUTHOR = 'Paul J. Deitel';
+--where CATEGORY,AUTHOR = 'JAVA', 'Paul J. Deitel';
+where ALL(CATEGORY,AUTHOR ) = 'JAVA', 'Paul J. Deitel';
+
+BOOK_TITLE
+--------------------------
+Java How To Do Program
+Java How To Do Program
+Java How To Do Program
+
+
+Question : Member_id and book_code of all issuances that have not paid any fine 
+1) identify the source of data : lms_book_issue 
+2) filter on column : FINE_RANGE
+3) project column : MEMBER_ID	BOOK_CODE
+
+select MEMBER_ID,BOOK_CODE
+from lms_book_issue
+where FINE_RANGE is null;
+
+MEMBER_ID	BOOK_CODE
+------------------------
+LM001		BL000001
+LM005		BL000005
+LM001		BL000002
+LM005		BL000002
+LM001		BL000001
+LM005		BL000005
+LM001		BL000002
+LM005		BL000002
+
+Question : Member_id and book_code of all issuances where DATE_RETURN < DATE_RETURNED [Fine pay]
+
+1) identify the source of data : lms_book_issue 
+2) filter on column : FINE_RANGE  -- =IF(E3<F3,"OUT")
+3) project column : MEMBER_ID	BOOK_CODE
+	
+	select MEMBER_ID,BOOK_CODE
+	from lms_book_issue
+	where DATE_RETURN < DATE_RETURNED;
+	
+MEMBER_ID	BOOK_CODE
+--------------------------
+LM002		BL000002
+LM003		BL000007
+LM004		BL000005
+LM003		BL000007
+LM002		BL000001
+LM003		BL000005
+LM004		BL000007
+LM003		BL000001
+LM002		BL000002
+LM003		BL000007
+LM004		BL000005
+LM003		BL000007
+LM002		BL000001
+LM003		BL000005
+LM004		BL000007
+LM003		BL000001
+	
+	
+Question : Name of the book and "It is placed on rack num <Racknum_value>" display where the category is python 
+1) identify the source of data : lms_book_details 
+2) filter on column : Category
+3) project column : BOOK_TITLE, <Derived column named display >
+
+desc lms_book_details;
+
+select BOOK_TITLE, concat('It is placed on rack num',RACK_NUM) display
+from lms_book_details
+where lower(Category) = 'python' ;
+--'It is placed on rack num' || RACK_NUM
+BOOK_TITLE                                                   display
+--------------------------------------------------------------------------------------------
+Python Cookbook: Recipes for Mastering Python 3              It is placed on rack num -
+Learn Python in 1 Day                                        It is placed on rack num A3
+Python Programming:An Introduction to Computer Science       It is placed on rack num -
+	
+
+-- like operator 
+select MEMBER_NAME from lms_members where upper(member_name) like '%A%';
+
+
+-- DECODE/SIMPLE CASE/SEARCHED CASE
+SELECT 
+mem.CITY my_city,
+DECODE(CITY,'CHENNAI','RENAMED_CHENNAI','PUNE','RENAMED_PUNE','DEFAULT_VALUE')  DECODE_EXP,
+CASE mem.CITY
+    WHEN 'CHENNAI' THEN 'RENAMED_CHENNAI'
+    WHEN 'PUNE' THEN 'RENAMED_PUNE'
+    ELSE
+    'DEFAULT_VALUE' 
+END SIMPLE_CASE_EXPR,
+CASE 
+    WHEN mem.CITY = 'CHENNAI' THEN 'RENAMED_CHENNAI'
+    WHEN mem.CITY = 'PUNE' THEN 'RENAMED_PUNE'
+    ELSE
+    'DEFAULT_VALUE' 
+END SEARCHED_CASE_EXPR
+FROM LMS_MEMBERS mem;	
+
+-- string functions 
+select substr('parent_string',1,3) substring_a , instr('parent_string','p',1,1)
+from dual;
+
+-- demonstrate trim function useful with whitespaces removal
+select 'gaurav' without_spaces , '  gaurav  ' with_spaces , '  gaurav' left_space , 'gaurav  ' right_space
+from dual;
+
+trim() -- remove preceding and following whitespaces
+rtrim() --  following whitespaces
+ltrim() -- remove preceding 
+
+select 'gaurav' without_spaces , trim('  gaurav  ') with_spaces , ltrim('  gaurav') left_space , rtrim('gaurav  ') right_space
+from dual;
+
+-- alternate solution 
+select sysdate ,
+to_char(sysdate,'dd-mm-yyyy') date_string,
+to_char(sysdate,'dd') date_extracted,
+to_char(sysdate,'mm') date_extracted,
+to_char(sysdate,'yyyy') date_extracted
+from dual;
+
+
+
+-----
+Exercises:
+-----
+Today's Agenda
+-------------------------------
+Hands On session -- Simple selects
+-------------------------------
+/* Name of the supplier that reside in chennai/delhi/ahmedabad */
+
+/* Display Name of the member , City in which he resides , date of membership expiry,
+    duration in days in which he is a member as of today
+*/
+
+-- select to_date('31-01-2001','dd-mm-yyyy') - to_date('01-01-2001','dd-mm-yyyy') from dual;
+--select 365*4.3 from dual;
+
+
+/*a) Name of the supplier , contact , email , Address who resides in either Mumbai Or Delhi and email does not belong to gmail account*/
+
+/*
+    money@ gmail.com
+    dance@ gmail.com
+    %      gmail.com
+*/
+
+/* name of the member who has an a/A in it and status is temporary */
+
+/* name of the member who resides in Pune[Case insensitive] and his membership_status is Permanent*/
+
+/*name of the suppliers who has a gmail account*/
+
+/* name of the books who were published by Tata Mcgraw Hill */
+
+/*
+a) Name of the book , 
+Year in which it was published ,
+publication name , 
+Category ,
+--Type of Language (Java -> Object Oriented Language , C-> Procedural language )
+for book that were published on or after Year 2005 or not published by Tata Mcgraw Hill
+*/
+/*
+alter session set nls_date_format = 'dd-mm-yyyy hh24:mi:ss';
+
+--------------
+Solution:
+---------------
+Today's Agenda
+-------------------------------
+Hands On session -- Simple selects
+-------------------------------
+/* Name of the supplier that reside in chennai/delhi/ahmedabad */
+
+select SUPPLIER_NAME
+from lms_suppliers_details
+--where lower(ADDRESS)  in('chennai','delhi','ahmedabad');
+--where upper(ADDRESS)  in('CHENNAI','DELHI','AHMEDABAD');
+where upper(ADDRESS)  = upper('chennai')
+or upper(ADDRESS)  = upper('delhi')
+or upper(ADDRESS)  = upper('ahmedabad');
+
+/* Display Name of the member , City in which he resides , date of membership expiry,
+    duration in days in which he is a member as of today
+*/
+
+SELECT  
+MEMBER_NAME, CITY, DATE_EXPIRE, date_register, round(sysdate - date_register ) duration_in_days,
+(sysdate - date_register)/365 duration_in_years
+from lms_members ;
+
+-- select to_date('31-01-2001','dd-mm-yyyy') - to_date('01-01-2001','dd-mm-yyyy') from dual;
+--select 365*4.3 from dual;
+
+
+/*a) Name of the supplier , contact , email , Address who resides in either Mumbai Or Delhi 
+    and email does not belong to gmail account*/
+
+-- not like 'gmail.com';
+-- != 'gmail.com'
+/*
+    money@ gmail.com
+    dance@ gmail.com
+    %      gmail.com
+*/
+
+ 
+select lower(supplier_name) name, contact , email, ADDRESS
+from LMS_SUPPLIERS_DETAILS
+where upper(ADDRESS) in ('MUMBAI','DELHI') 
+and lower(email) not like '%gmail.com';
+
+/*
+-- demonstrate trim function useful with whitespaces removal
+select 'gaurav' without_spaces , '  gaurav  ' with_spaces , '  gaurav' left_space , 'gaurav  ' right_space
+from dual;
+
+trim() -- remove preceding and following whitespaces
+rtrim() --  following whitespaces
+ltrim() -- remove preceding 
+
+select 'gaurav' without_spaces , trim('  gaurav  ') with_spaces , ltrim('  gaurav') left_space , rtrim('gaurav  ') right_space
+from dual;
+*/
+
+/* name of the member who has an a/A in it and status is temporary */
+select member_name  
+from LMS_MEMBERS
+where lower(member_name)  like '%a%' 
+and membership_status = 'Temporary';
+
+/* name of the member who resides in Pune[Case insensitive] and his membership_status is Permanent*/
+
+select MEMBER_NAME
+from lms_members
+where lower(city) = 'pune' and MEMBERSHIP_STATUS = 'Permanent';
+
+/*name of the suppliers who has a gmail account*/
+select supplier_name
+from lms_suppliers_details
+where lower(email) like '%gmail.com';
+
+/* name of the books who were published by Tata Mcgraw Hill */
+
+select book_title
+from lms_book_details 
+where trim(publication) = 'Tata Mcgraw Hill';
+
+/*
+a) Name of the book , 
+Year in which it was published ,
+publication name , 
+Category ,
+--Type of Language (Java -> Object Oriented Language , C-> Procedural language )
+for book that were published on or after Year 2005 or not published by Tata Mcgraw Hill
+*/
+/*
+alter session set nls_date_format = 'dd-mm-yyyy hh24:mi:ss';
+
+-- extract
+select sysdate, 
+extract(month from sysdate) month_extracted , 
+extract(day from sysdate) day_extracted,
+extract(year from sysdate) year_extracted,
+extract(HOUR from cast(sysdate as timestamp)) hour_extracted,
+extract(HOUR from systimestamp) hour_extracted_from_systimestamp,
+extract(MINUTE from cast(sysdate as timestamp)) minute_extracted,
+extract(SECOND from cast(sysdate as timestamp)) second_extracted
+from dual;
+
+-- cast function
+select cast( 2 as varchar2(10) ) from dual;
+select cast( 'gaurav' as number ) from dual;
+
+select decode('JAVA','JAVA','Object Oriented Language','C','Procedural language','default_value') from dual;
+select decode('C','JAVA','Object Oriented Language','C','Procedural language','default_value') from dual;
+select decode('C++','JAVA','Object Oriented Language','C','Procedural language','default_value') from dual;
+
+
+*/
+
+select book_title,extract(year from PUBLISH_DATE) published_year,PUBLICATION,CATEGORY,
+decode(CATEGORY,'JAVA','Object Oriented Language','C','Procedural language','default_value')  Type_of_Language
+from lms_book_details
+where extract(year from PUBLISH_DATE) >= 2005  or trim(PUBLICATION) !=  'Tata Mcgraw Hill';
+
+-- alternate solution 
+select sysdate ,
+to_char(sysdate,'dd-mm-yyyy') date_string,
+to_char(sysdate,'dd') date_extracted,
+to_char(sysdate,'mm') date_extracted,
+to_char(sysdate,'yyyy') date_extracted
+from dual;
+
+
+select book_title,to_char(PUBLISH_DATE,'yyyy') published_year,PUBLICATION,CATEGORY,
+decode(CATEGORY,'JAVA','Object Oriented Language','C','Procedural language','default_value')  Type_of_Language
+from lms_book_details
+where cast(to_char(PUBLISH_DATE,'yyyy') as number) >= 2005 or trim(PUBLICATION) !=  'Tata Mcgraw Hill';
+
+
+
+--------------------------
+Joins Theory, Why do we need them , What are the types of joins 
+--------------------------------------------------------
+
+Types of joins :
+1) Inner join/ Equi Join / Natural Joins 
+2) Outer join :-> Full outer join/Full join , Left Outer Join /Left Join,  Right Outer Join/Right join
+3) Cross Join 
+
+--------------------
+ -- Joins Demo 
+-------------------
+/* name of the member , status of his membership who have issued a book */
+select distinct lms_members.MEMBER_NAME,lms_members.MEMBERSHIP_STATUS 
+from lms_members  inner join  lms_book_issue on(lms_members.member_id = lms_book_issue.member_id );
+
+/* name of the book and its supplier's email,contact number( case1: if it has no supplier dont display that book) */
+select bd.BOOK_TITLE,sd.EMAIL,sd.contact
+from LMS_SUPPLIERS_DETAILS SD inner join LMS_BOOK_DETAILS BD on(sd.supplier_id = bd.supplier_id);
+
+/* name of the book and its supplier's email,contact number( case2: if it has no suppliers  ) */
+select bd.BOOK_TITLE,sd.EMAIL,sd.contact
+from LMS_SUPPLIERS_DETAILS SD right outer join LMS_BOOK_DETAILS BD on(sd.supplier_id = bd.supplier_id)
+where sd.SUPPLIER_ID is null;
+-- or 
+select bd.BOOK_TITLE,sd.EMAIL,sd.contact
+from   LMS_BOOK_DETAILS BD left outer join LMS_SUPPLIERS_DETAILS SD on(sd.supplier_id = bd.supplier_id)
+where sd.SUPPLIER_ID is null;
+-- or
+
+select bd.BOOK_TITLE,null EMAIL,null contact
+from   LMS_BOOK_DETAILS BD
+where bd.SUPPLIER_ID is null;
+
+/* name of the book and its supplier's email,contact number
+( case3: display all the books irrespective of if they have suppliers or not
+  and display all the suppliers irrespective of if they have supplied a book or not ) */
+
+select bd.BOOK_TITLE,sd.EMAIL,sd.contact
+from   LMS_BOOK_DETAILS BD full outer join LMS_SUPPLIERS_DETAILS SD on(sd.supplier_id = bd.supplier_id)  ;
+
+/* display suppliers who did not supply any book (B-A) */
+
+select sd.*
+from LMS_SUPPLIERS_DETAILS SD left outer join LMS_BOOK_DETAILS BD on(sd.supplier_id = bd.supplier_id)
+where bd.book_code is null;
+
+/* 
+I want to mandate all my suppliers to supply all available books in my LMS 
+so I want a query that gives the name of the supplier , contact and book name , book price
+*/  
+
+select sd.supplier_name,sd.contact,bd.book_title,bd.price
+from LMS_SUPPLIERS_DETAILS sd cross join LMS_BOOK_DETAILS bd;
+
+-----------------------------------------------------
+Joins Hands on 
+-----------------------------------------------------
+/* name of the book , publication , date of publication along with supplier name and his contact number 
+Note : books that have no suppliers should not be displayed*/
+
+/*name of the book , publication , date of publication along with supplier name and his contact number which may or may not have a supplier*/
+
+
+/* name of the member , status of his membership who have issued a book and never paid a fine  */
+
+/* name of the member , status of his membership who have issued a book and paid atleast fine more than 74 rs*/
+
+
+
+/* name of the member , status of his membership who have issued a book 
+and paid atleast fine more than 74 rs 
+and the supplier has a gmail account */
+
+/* name of the member who has issued a book which is not placed on any rack*/
+
+/* name of the supplier who has not supplied any book 
+and that supplier lives in PUNE/MUMBAI/DELHI*/
+
+/* Name of the book , edition , publication that have never been issued  */
+
+/* Name of the book , edition , publication that have been issued to members
+who have enrolled after 01-01-1999*/
+
+/* Name of the members who have issued a book later than 01-01-2000*/
+
+/* Name of the members who have issued a book and such that book supplier belongs to PUNE/MUMBAI/DELHI*/
+
+/* Name of the members who have issued a book from the publication "The MIT Press" */
+
+
+

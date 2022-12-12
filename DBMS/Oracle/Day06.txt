@@ -1,0 +1,88 @@
+/* name of the book , publication , date of publication along with supplier name and his contact number 
+Note : books that have no suppliers should not be displayed*/
+
+select BOOK_TITLE,PUBLICATION,PUBLISH_DATE,SUPPLIER_NAME,CONTACT
+from LMS_BOOK_DETAILS bd inner join LMS_SUPPLIERS_DETAILS sd on (bd.supplier_id = sd.supplier_id)
+
+/*name of the book , publication , date of publication along with supplier name and his contact number 
+which may or may not have a supplier*/
+select BOOK_TITLE,PUBLICATION,PUBLISH_DATE,SUPPLIER_NAME,CONTACT
+from LMS_BOOK_DETAILS bd left join LMS_SUPPLIERS_DETAILS sd on (bd.supplier_id = sd.supplier_id)
+
+/* name of the member , status of his membership who have issued a book and never paid a fine  */
+
+select distinct MEMBER_NAME	,MEMBERSHIP_STATUS
+from lms_members lm inner join lms_book_issue bi on(lm.member_id = bi.member_id)
+where FINE_RANGE is null ;
+
+
+
+/* name of the member , status of his membership who have issued a book and paid atleast fine more than 74 rs*/
+
+select distinct MEMBER_NAME	,MEMBERSHIP_STATUS 
+from lms_members lm inner join lms_book_issue bi on(lm.member_id = bi.member_id)
+                    inner join lms_fine_details fd on(fd.fine_range = bi.fine_range)
+where FINE_AMOUNT > 74;
+
+
+/* name of the member , status of his membership who have issued a book 
+and paid atleast fine more than 74 rs 
+and the supplier has a gmail account */
+
+select distinct MEMBER_NAME	,MEMBERSHIP_STATUS 
+from lms_members lm inner join lms_book_issue bi on(lm.member_id = bi.member_id)
+                    inner join lms_fine_details fd on(fd.fine_range = bi.fine_range)
+                    inner join lms_book_details bd on( bi.book_code = bd.book_code)
+                    inner join lms_suppliers_details sd on( sd.supplier_id = bd.supplier_id)
+where FINE_AMOUNT > 74 and lower(sd.email) like '%gmail.com';
+
+/* name of the member who has issued a book which is not placed on any rack*/
+select distinct MEMBER_NAME
+from lms_members lm inner join lms_book_issue bi on(lm.member_id = bi.member_id)
+                    inner join lms_book_details bd on( bi.book_code = bd.book_code)
+where bd.rack_num is null                     
+
+
+/* name of the supplier who has not supplied any book 
+and that supplier lives in PUNE/MUMBAI/DELHI*/
+
+select supplier_name
+from lms_suppliers_details sd left join lms_book_details bd on (bd.SUPPLIER_ID = sd.SUPPLIER_ID)
+WHERE bd.book_code is null and lower(sd.ADDRESS) in ('pune','mumbai','delhi');
+
+/* Name of the book , edition , publication that have never been issued  */
+select bd.BOOK_TITLE, bd.BOOK_EDITION, bd.PUBLICATION
+from lms_book_details bd left outer join lms_book_issue bi on (bd.BOOK_CODE = bi.BOOK_CODE)
+WHERE bi.BOOK_ISSUE_NO is NULL;
+
+
+/* Name of the book , edition , publication that have been issued to members
+who have enrolled after 01-01-1999*/
+
+SELECT bd.BOOK_TITLE, bd.BOOK_EDITION, bd.PUBLICATION
+FROM lms_book_details bd INNER JOIN lms_book_issue bi on (bd.BOOK_CODE = bi.BOOK_CODE)
+INNER JOIN lms_members lm on (bi.MEMBER_ID = lm.MEMBER_ID)
+WHERE lm.DATE_REGISTER > to_date('01-01-1999','dd-mm-yyyy');
+
+
+/* Name of the members who have issued a book later than 01-01-2000*/
+
+SELECT distinct lm.MEMBER_NAME
+FROM lms_members lm INNER JOIN lms_book_issue bi on (lm.MEMBER_ID = bi.MEMBER_ID)
+WHERE bi.DATE_ISSUE > to_date('01-01-2000','dd-mm-yyyy');
+
+/* Name of the members who have issued a book and such that book supplier belongs to PUNE/MUMBAI/DELHI*/
+
+SELECT distinct lm.MEMBER_NAME
+FROM lms_members lm INNER JOIN lms_book_issue bi on (lm.MEMBER_ID = bi.MEMBER_ID)
+INNER JOIN lms_book_details bd on (bi.BOOK_CODE = bd.BOOK_CODE)
+INNER JOIN lms_suppliers_details sd on (bd.SUPPLIER_ID = sd.SUPPLIER_ID)
+WHERE lower(sd.ADDRESS) in ('pune','mumbai','delhi');
+
+/* Name of the members who have issued a book from the publication "The MIT Press" */
+
+
+SELECT distinct lm.MEMBER_NAME
+FROM lms_members lm INNER JOIN lms_book_issue bi on (lm.MEMBER_ID = bi.MEMBER_ID)
+INNER JOIN lms_book_details bd on (bi.BOOK_CODE = bd.BOOK_CODE)
+WHERE lower(bd.PUBLICATION) = 'the mit press';

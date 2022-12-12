@@ -1,0 +1,52 @@
+use diot_db;
+show collections;
+db.createCollection('test');
+db.test.drop();
+
+db.LMS_BOOK_DETAILS.find({},{})
+db.LMS_SUPPLIERS_DETAILS.find({},{})
+
+db.student.insert({"first_name":"Gaurav"});
+db.student.insert({"_id" : 100, "first_name":"Gaurav"});
+db.student.insert({"_id" : NumberInt(101), "first_name":"Gaurav"});
+db.student.insert({"_id" : "my_pk", "first_name":"Gaurav"});
+
+db.student.insert([
+{"_id" : "pk", "first_name":"Gaurav"},
+{"_id" : "pk1", "first_name":"Gaurav"}
+]
+);
+
+db.student.deleteMany({});
+db.student.deleteOne({});
+
+db.student.deleteMany({"_id" : "my_pk"});
+db.student.deleteMany({"_id" : {$eq: "my_pk"}});
+db.student.deleteMany({"_id" : {$ne: "my_pk"}});
+db.student.deleteMany({"_id" : /A/i});
+db.student.deleteMany({"first_name" : {$regex: /A/i}});
+
+db.student.update({},{$set:{"first_name" : "updated_value"} });
+db.student.updateMany({},{$set:{"first_name" : "again_updated_value"} });
+db.student.updateOne({},{$set:{"first_name" : "reagain_updated_value"} });
+
+/* miscellaneous operations*/
+// add a field to a collection
+db.student.updateMany({},{$set:{"last_name" : "default_value"} });
+// drop a field to a collection
+db.student.updateMany({},{$unset:{"last_name" : "default_value"} });
+// rename a field to a collection
+db.student.updateMany({},{$rename:{"first_name" : "renamed_first_name"} });
+
+// array operators
+db.student.updateMany({},{$set:{"marks" : [NumberInt(1),NumberInt(2),NumberInt(3)]} });
+db.student.find({"marks": {$elemMatch : {$eq:3}}},{});
+db.student.find({"marks": {$elemMatch : {$ne:3}}},{});
+db.student.find({"marks": {$all: [NumberInt(2),NumberInt(1)]}},{});
+
+// embedded json 
+db.student.updateMany({},{$set:{"contact_info" : {"mobile": 901291092,"pager":920392809}} });
+db.student.find({"contact_info.mobile": 901291092},{});
+
+// projection 
+db.student.find({"contact_info.mobile": 901291092},{"renamed_first_name" : 1,"_id" :0});
